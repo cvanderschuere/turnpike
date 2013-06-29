@@ -20,6 +20,7 @@ type Client struct {
 	SessionId       string
 	ProtocolVersion int
 	ServerIdent     string
+	HandleChan 		chan interface{} //Sends back all handle messages to be handles in other package
 }
 
 func NewClient() *Client {
@@ -90,16 +91,19 @@ func (c *Client) PublishExcludeMe(topicURI string, event interface{}) error {
 func (c *Client) handleCallResult(msg CallResultMsg) {
 	log.Trace("Handling call result message")
 	// TODO:
+	c.HandleChan<-msg
 }
 
 func (c *Client) handleCallError(msg CallErrorMsg) {
 	log.Trace("Handling call error message")
 	// TODO:
+	c.HandleChan<-msg
 }
 
 func (c *Client) handleEvent(msg EventMsg) {
 	log.Trace("Handling event message")
 	// TODO:
+	c.HandleChan<-msg
 }
 
 func (c *Client) ReceiveWelcome() error {
@@ -196,6 +200,9 @@ func (c *Client) Connect(server, origin string) error {
 		return err
 	}
 	log.Info("Connected to server: %s", server)
+	
+	//Create handle channel
+	c.HandleChan = make(chan interface{},50)
 
 	go c.Listen()
 	go c.Send()
