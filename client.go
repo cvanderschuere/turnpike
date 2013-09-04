@@ -189,9 +189,19 @@ func (c *Client) Send() {
 }
 
 func (c *Client) Connect(server, origin string) error {
+	config,_ := websocket.NewConfig(server,origin)
+	return c.ConnectConfig(config)
+	
+}	
+
+func (c *Client) ConnectConfig(config *websocket.Config)(error){
 	log.Trace("connect")
+	
+	
+	config.Protocol = append(config.Protocol,WAMP_SUBPROTOCOL_ID)
+	
 	var err error
-	if c.ws, err = websocket.Dial(server, WAMP_SUBPROTOCOL_ID, origin); err != nil {
+	if c.ws, err = websocket.DialConfig(config); err != nil {
 		return fmt.Errorf("Error connecting to websocket server: %s", err)
 	}
 
@@ -199,7 +209,7 @@ func (c *Client) Connect(server, origin string) error {
 	if err = c.ReceiveWelcome(); err != nil {
 		return err
 	}
-	log.Info("Connected to server: %s", server)
+	log.Info("Connected to server: %s", config.Location.String())
 	
 	//Create handle channel
 	c.HandleChan = make(chan interface{},50)
