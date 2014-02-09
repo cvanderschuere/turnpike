@@ -357,7 +357,7 @@ func (c *Client) ConnectConfig(config *websocket.Config)(error){
 	}
 
 	if debug {
-		log.Printf("turnpike: connected to server: %s", server)
+		log.Printf("turnpike: connected to server: %s", config.Location.Host)
 	}
 
 	go c.receive()
